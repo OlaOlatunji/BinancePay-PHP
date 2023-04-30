@@ -34,8 +34,8 @@ $request = array(
     'goods' => array(
         'goodsType' => '01',
         'goodsCategory' => '0000',
-        'referenceGoodsId' => 'abc001',
-        'goodsName' => 'apple',
+        'referenceGoodsId' => 'balablu',
+        'goodsName' => 'banana',
         'goodsUnitAmount' => array('currency' => 'USDT', 'amount' => 1.00),
     ),
     'shipping' => array(
