@@ -74,6 +74,7 @@
                     data: form_data,
                     dataType: 'json',
                     success: function (response) {
+                        console.log(response);
                         if (response.success) {
                             $('#qr-img').attr('src', response.qr_code_url);
                             $('#qr-code').show();
@@ -83,6 +84,7 @@
                         }
                     },
                     error: function () {
+                        console.log('error');
                         alert('An error occurred while creating the order. Please try again later.');
                     }
                 });
