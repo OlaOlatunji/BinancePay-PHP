@@ -3,6 +3,9 @@
 define('BINANCE_PAY_CERTIFICATE_SN', 'zp0ree8cq1lksnaohlg9bn57oshbbodfb62btkavzxel9qac36ctw9mmflsrjwrv');
 define('BINANCE_PAY_SECRET', '9frnw7dgcs5zlwi8yf4yrz9snjzoakwufwymgdc3n3u24fefw70eajwuvoeipxmy');
 
+// Get the amount from the POST data
+$amount = isset($_POST['amount']) ? floatval($_POST['amount']) : null;
+
 // Generate nonce string
 $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 $nonce = '';
@@ -26,7 +29,7 @@ $headers[] = 'BinancePay-Certificate-SN: ' . BINANCE_PAY_CERTIFICATE_SN;
 $request = array(
     'env' => array('terminalType' => 'MINI_PROGRAM'),
     'merchantTradeNo' => '2224',
-    'orderAmount' => 0.10,
+    'orderAmount' => $amount,
     'currency' => 'USDT',
     'goods' => array(
         'goodsType' => '01',
