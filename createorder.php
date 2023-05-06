@@ -2,6 +2,8 @@
 // Define constants for Binance Pay credentials
 define('BINANCE_PAY_CERTIFICATE_SN', '168677762');
 define('BINANCE_PAY_SECRET', 'oe9z3bwax0symufldlaf3gyba20qkkyccs8bujdkrmm8nvvy484pi9gt40a97sqy');
+define('YOUR_MERCHANT_ID', '9090908');
+define('CERT_SN', '');
 
 // Get the amount from the POST data
 $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : null;
@@ -24,6 +26,7 @@ $headers[] = 'Content-Type: application/json';
 $headers[] = 'BinancePay-Timestamp: ' . round(microtime(true) * 1000);
 $headers[] = 'BinancePay-Nonce: ' . $nonce;
 $headers[] = 'BinancePay-Certificate-SN: ' . BINANCE_PAY_CERTIFICATE_SN;
+$headers[] = 'X-Forwarded-For: ' . $_SERVER['REMOTE_ADDR'];
 
 // Build request body
 $request = array(
@@ -48,12 +51,15 @@ $request = array(
 );
 $json_request = json_encode($request);
 
-// Calculate signature
+// Build payload
 $payload = implode("\n", array(
-    $headers[1], // timestamp
+    'certSn=' . CERT_SN,
+    'merchantId=' . YOUR_MERCHANT_ID,
+    $headers[1],
     $nonce,
     $json_request,
 ));
+
 $signature = strtoupper(hash_hmac('SHA512', $payload, BINANCE_PAY_SECRET));
 
 // Add signature header to request headers
