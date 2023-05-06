@@ -1,7 +1,7 @@
 <?php
 // Define constants for Binance Pay credentials
-define('BINANCE_PAY_CERTIFICATE_SN', 'zp0ree8cq1lksnaohlg9bn57oshbbodfb62btkavzxel9qac36ctw9mmflsrjwrv');
-define('BINANCE_PAY_SECRET', '9frnw7dgcs5zlwi8yf4yrz9snjzoakwufwymgdc3n3u24fefw70eajwuvoeipxmy');
+define('BINANCE_PAY_CERTIFICATE_SN', '168677762');
+define('BINANCE_PAY_SECRET', 'oe9z3bwax0symufldlaf3gyba20qkkyccs8bujdkrmm8nvvy484pi9gt40a97sqy');
 
 // Get the amount from the POST data
 $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : null;

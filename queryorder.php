@@ -1,7 +1,7 @@
 <?php 
 // Define constants
-define('BINANCE_PAY', 'zp0ree8cq1lksnaohlg9bn57oshbbodfb62btkavzxel9qac36ctw9mmflsrjwrv');
-define('BINANCE_PAY_SECRET', '9frnw7dgcs5zlwi8yf4yrz9snjzoakwufwymgdc3n3u24fefw70eajwuvoeipxmy');
+define('BINANCE_PAY', '168677762');
+define('BINANCE_PAY_SECRET', 'oe9z3bwax0symufldlaf3gyba20qkkyccs8bujdkrmm8nvvy484pi9gt40a97sqy');
 
 // Generate nonce string 
 $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'; 
