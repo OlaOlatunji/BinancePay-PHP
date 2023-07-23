@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Pay with Binance Pay</title>
     <style>
@@ -35,7 +34,7 @@
         }
 
         button {
-            background-color: #4CAF50;
+            background-color: #4caf50;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -49,7 +48,6 @@
         }
     </style>
 </head>
-
 <body>
     <h1>Pay with Binance Pay</h1>
     <form id="payment-form" action="createorder.php" method="POST">
@@ -95,7 +93,7 @@
                     $.ajax({
                         url: 'queryorder.php',
                         type: 'POST',
-                        data: { order_id: order_id },
+                        data: { merchantTradeNo: order_id },
                         dataType: 'json',
                         success: function (response) {
                             if (response.success) {
@@ -123,5 +121,4 @@
         });
     </script>
 </body>
-
 </html>

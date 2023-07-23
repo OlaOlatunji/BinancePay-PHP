@@ -17,15 +17,12 @@ $ch = curl_init();
 $timestamp = round(microtime(true) * 1000); 
 // Request body 
 $request = array( 
-    "merchantTradeNo" => "2223", 
+    "merchantTradeNo" => isset($_POST['merchantTradeNo']) ? $_POST['merchantTradeNo'] : null, // Get merchantTradeNo from POST data
 ); 
 
 $json_request = json_encode($request); 
 $payload = $timestamp."\n".$nonce."\n".$json_request."\n"; 
 $signature = strtoupper(hash_hmac('SHA512',$payload,BINANCE_PAY_SECRET)); 
-
-echo $timestamp."<br/>"; 
-echo $signature."<br/>"; 
 
 $headers = array(); 
 $headers[] = "Content-Type: application/json"; 
@@ -44,13 +41,31 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, $json_request);
 // Execute curl request
 $result = curl_exec($ch); 
 
-// Handle errors
+// Check for errors
 if (curl_errno($ch)) {
-    echo 'Error:' . curl_error($ch); 
-    // Log error or send alert to admin
+    $response = array(
+        'success' => false,
+        'error' => 'Error: ' . curl_error($ch),
+    );
 } else {
-    echo $result;
+    // Output result
+    $response_data = json_decode($result, true);
+    if ($response_data['code'] === '000000') {
+        $response = array(
+            'success' => true,
+            'status' => $response_data['status'],
+        );
+    } else {
+        $response = array(
+            'success' => false,
+            'error' => $response_data['msg'],
+        );
+    }
 }
 
 // Close curl
-curl_close ($ch); 
+curl_close($ch); 
+
+// Send the response as JSON
+header('Content-Type: application/json');
+echo json_encode($response);

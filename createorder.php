@@ -75,11 +75,30 @@ $result = curl_exec($ch);
 
 // Check for errors
 if (curl_errno($ch)) {
-    echo 'Error: ' . curl_error($ch);
+    $response = array(
+        'success' => false,
+        'error' => 'Error: ' . curl_error($ch),
+    );
 } else {
     // Output result
-    echo $result;
+    $response_data = json_decode($result, true);
+    if ($response_data['code'] === '000000') {
+        $response = array(
+            'success' => true,
+            'qr_code_url' => $response_data['qrCodeUrl'],
+            'order_id' => $response_data['merchantTradeNo'],
+        );
+    } else {
+        $response = array(
+            'success' => false,
+            'error' => $response_data['msg'],
+        );
+    }
 }
 
 // Close cURL
 curl_close($ch);
+
+// Send the response as JSON
+header('Content-Type: application/json');
+echo json_encode($response);
