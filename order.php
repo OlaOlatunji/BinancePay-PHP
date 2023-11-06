@@ -21,7 +21,7 @@ $returnData = [];
 
 if ($_SERVER["REQUEST_METHOD"] != "POST") {
     // Return a message for unsupported HTTP method
-    $returnData = msg(0, 404, 'Page Not Found!');
+    $returnData = msg(0, 'Page Not Found!', ['status' => 404]);
 } else {
     // Generate nonce and timestamp for Binance Pay request
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
