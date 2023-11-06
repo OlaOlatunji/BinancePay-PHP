@@ -1,14 +1,15 @@
 <?php
+// Set CORS headers
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: access");
 header("Access-Control-Allow-Methods: POST");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-function msg($success, $status, $message, $extra = [])
+// Function to create response message
+function msg($status, $message, $extra = [])
 {
     return json_encode(array_merge([
-        'success' => $success,
         'status' => $status,
         'message' => $message
     ], $extra));
@@ -19,8 +20,10 @@ $data = json_decode(file_get_contents("php://input"));
 $returnData = [];
 
 if ($_SERVER["REQUEST_METHOD"] != "POST") {
+    // Return a message for unsupported HTTP method
     $returnData = msg(0, 404, 'Page Not Found!');
 } else {
+    // Generate nonce and timestamp for Binance Pay request
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $nonce = '';
     for ($i = 1; $i <= 32; $i++) {
@@ -28,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
         $char = $chars[$pos];
         $nonce .= $char;
     }
-    
+
     $timestamp = round(microtime(true) * 1000);
 
     $orderAmount = isset($data->orderAmount) ? floatval($data->orderAmount) : null;
@@ -38,7 +41,15 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
     $goodsName = isset($data->goodsName) ? trim($data->goodsName) : null;
     $goodsDetail = isset($data->goodsDetail) ? trim($data->goodsDetail) : null;
 
-    if ($orderAmount === null || empty($goodsType) || empty($goodsCategory) || empty($referenceGoodsId) || empty($goodsName) || empty($goodsDetail)) {
+    if (
+        $orderAmount === null ||
+        empty($goodsType) ||
+        empty($goodsCategory) ||
+        empty($referenceGoodsId) ||
+        empty($goodsName) ||
+        empty($goodsDetail)
+    ) {
+        // Return an error message for missing or invalid fields
         $fields = ['fields' => ['orderAmount', 'goodsType', 'goodsCategory', 'referenceGoodsId', 'goodsName', 'goodsDetail']];
         $returnData = msg(0, 422, 'Please provide all required fields!', $fields);
     } else {
@@ -47,6 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
         $binanceApiSecret = "11ormy7nagygzhfjbvw5o6tvnpkkzkidsrs4i5cwopfvnukxe3dlnpojfopivgug";
         $binanceApiEndpoint = "https://bpay.binanceapi.com/binancepay/openapi/v2/order";
 
+        // Prepare payload for the request
         $payload = [
             "env" => ["terminalType" => "APP"],
             "merchantTradeNo" => mt_rand(982538, 9825382937292),
@@ -61,18 +73,21 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
             ]
         ];
 
+        // Convert payload to JSON
         $json_payload = json_encode($payload);
 
         // Generate the signature
         $payloadWithTimestamp = $timestamp . "\n" . $nonce . "\n" . $json_payload . "\n";
         $signature = strtoupper(hash_hmac('SHA512', $payloadWithTimestamp, $binanceApiSecret));
 
+        // Initialize cURL session for making the request
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $binanceApiEndpoint);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $json_payload);
 
+        // Set headers for the request
         $headers = [
             "Content-Type: application/json",
             "BinancePay-Certificate-SN: $binanceApiKey",
@@ -80,26 +95,33 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
             "BinancePay-Nonce: $nonce",
             "BinancePay-Signature: $signature",
         ];
-
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
+        // Execute the request and get the response
         $result = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            $returnData = msg(0, 500, 'Failed to create the order. Curl error: ' . curl_error($ch));
+            // Return an error message if cURL encounters an issue
+            $returnData = msg(500, 'Failed to create the order. Curl error: ' . curl_error($ch));
         } else {
+            // Parse the response and handle success or failure
             $response = json_decode($result, true);
 
             if (isset($response['status']) && $response['status'] === 'SUCCESS') {
-                $returnData = msg(1, 201, 'Order Created', ['binanceResponse' => $response]);
+                // Return a success message with Binance Pay response
+                $returnData = msg(201, 'Order Created', [$response][0]);
             } else {
-                $returnData = msg(0, 500, 'Failed to create the order. Binance Pay response: ' . $result);
+                // Return an error message with the Binance Pay response
+                $returnData = msg(500, 'Failed to create the order. Binance Pay response:' . $result);
             }
         }
 
+        // Close the cURL session
         curl_close($ch);
     }
 }
 
+// Output the response as JSON
 echo $returnData;
+
 ?>

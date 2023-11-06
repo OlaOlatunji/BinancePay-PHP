@@ -5,6 +5,7 @@
     <title>Order Form</title>
     <!-- Add Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
@@ -20,7 +21,7 @@
                 <input type="text" class="form-control" id="goodsType" name="goodsType" placeholder="Enter Goods Type">
             </div>
             <div class="form-group">
-                <label for "goodsCategory">Goods Category:</label>
+                <label for="goodsCategory">Goods Category:</label>
                 <input type="text" class="form-control" id="goodsCategory" name="goodsCategory" placeholder="Enter Goods Category">
             </div>
             <div class="form-group">
@@ -37,104 +38,65 @@
             </div>
             <button type="submit" class="btn btn-primary">Create Order</button>
         </form>
-    </div>
 
-    <!-- Response Modal -->
-    <div class="modal fade" id="responseModal" tabindex="-1" role="dialog" aria-labelledby="responseModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="responseModalLabel">Order Response</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr>
-                                <th>Currency</th>
-                                <td id="currency"></td>
-                            </tr>
-                            <tr>
-                                <th>Total Fee</th>
-                                <td id="totalFee"></td>
-                            </tr>
-                            <tr>
-                                <th>Prepay ID</th>
-                                <td id="prepayId"></td>
-                            </tr>
-                            <tr>
-                                <th>Terminal Type</th>
-                                <td id="terminalType"></td>
-                            </tr>
-                            <tr>
-                                <th>Expire Time</th>
-                                <td id="expireTime"></td>
-                            </tr>
-                            <tr>
-                                <th>QR Code Link</th>
-                                <td id="qrcodeLink"></td>
-                            </tr>
-                            <tr>
-                                <th>QR Content</th>
-                                <td id="qrContent"></td>
-                            </tr>
-                            <tr>
-                                <th>Checkout URL</th>
-                                <td id="checkoutUrl"></td>
-                            </tr>
-                            <tr>
-                                <th>Deep Link</th>
-                                <td id="deeplink"></td>
-                            </tr>
-                            <tr>
-                                <th>Universal URL</th>
-                                <td id="universalUrl"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
+        <!-- Result section (initially hidden) -->
+        <div id="resultSection" style="display: none;">
+            <h2>Order Result</h2>
+            <p><strong>Currency:</strong> <span id="resultCurrency"></span></p>
+            <p><strong>Total Fee:</strong> <span id="resultTotalFee"></span></p>
+            <!-- Add more result fields as needed -->
         </div>
     </div>
 
-    <!-- Add jQuery and Bootstrap JS from CDNs -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <!-- Your custom JavaScript -->
     <script>
         $(document).ready(function() {
-            $('#orderForm').submit(function(e) {
-                e.preventDefault();
+            // Listen for form submission
+            $("#orderForm").submit(function(event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                // Get form data
+                var formData = {
+                    orderAmount: $("#orderAmount").val(),
+                    goodsType: $("#goodsType").val(),
+                    goodsCategory: $("#goodsCategory").val(),
+                    referenceGoodsId: $("#referenceGoodsId").val(),
+                    goodsName: $("#goodsName").val(),
+                    goodsDetail: $("#goodsDetail").val()
+                };
+
+                // Send an AJAX POST request to order.php
                 $.ajax({
-                    type: 'POST',
-                    url: 'order.php',
-                    data: $('#orderForm').serialize(),
+                    type: "POST",
+                    url: "order.php",
+                    data: JSON.stringify(formData),
+                    contentType: "application/json",
                     success: function(response) {
-                        $('#currency').text(response.binanceResponse.currency);
-                        $('#totalFee').text(response.binanceResponse.totalFee);
-                        $('#prepayId').text(response.binanceResponse.prepayId);
-                        $('#terminalType').text(response.binanceResponse.terminalType);
-                        $('#expireTime').text(response.binanceResponse.expireTime);
-                        $('#qrcodeLink').text(response.binanceResponse.qrcodeLink);
-                        $('#qrContent').text(response.binanceResponse.qrContent);
-                        $('#checkoutUrl').text(response.binanceResponse.checkoutUrl);
-                        $('#deeplink').text(response.binanceResponse.deeplink);
-                        $('#universalUrl').text(response.binanceResponse.universalUrl);
-                        $('#responseModal').modal('show');
+                        // Parse the JSON response
+                        var responseData = JSON.parse(response);
+
+                        if (responseData.status === "SUCCESS") {
+                            // Display the result section and hide the form
+                            $("#resultSection").show();
+                            $("#orderForm").hide();
+
+                            // Update the result section with the response data
+                            $("#resultCurrency").text(responseData.data.currency);
+                            $("#resultTotalFee").text(responseData.data.totalFee);
+                            // Add more result fields as needed
+                        } else {
+                            // Handle error responses
+                            alert("Error: " + responseData.message);
+                        }
                     },
                     error: function(xhr, status, error) {
-                        console.error('Request failed: ' + error);
+                        // Handle errors (e.g., show an error message)
+                        console.error("Error: " + status + " - " + error);
                     }
                 });
             });
         });
     </script>
+
 </body>
 
 </html>

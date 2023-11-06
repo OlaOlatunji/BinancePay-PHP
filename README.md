@@ -41,127 +41,16 @@ POST /binancepay/openapi/v2/order
 Check here for all the request parameters
 [-> Check here](https://developers.binance.com/docs/binance-pay/api-order-create-v2#request-parameters)
 
-## USAGE IN PHP
+## Sample Data
 
 ```
-<?php
-    // Generate nonce string
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $nonce = '';
-    for($i=1; $i <= 32; $i++)
-    {
-        $pos = mt_rand(0, strlen($chars) - 1);
-        $char = $chars[$pos];
-        $nonce .= $char;
-    }
-    $ch = curl_init();
-    $timestamp = round(microtime(true) * 1000);
-    // Request body
-     $request = array(
-       "env" => array(
-             "terminalType" => "APP" 
-          ), 
-       "merchantTradeNo" => mt_rand(982538,9825382937292), 
-       "orderAmount" => 25.17, 
-       "currency" => "BUSD", 
-       "goods" => array(
-                "goodsType" => "01", 
-                "goodsCategory" => "D000", 
-                "referenceGoodsId" => "7876763A3B", 
-                "goodsName" => "Ice Cream", 
-                "goodsDetail" => "Greentea ice cream cone" 
-             ) 
-    ); 
- 
-    $json_request = json_encode($request);
-    $payload = $timestamp."\n".$nonce."\n".$json_request."\n";
-    $binance_pay_key = "REPLACE-WITH-YOUR-BINANCE-MERCHANT-API-KEY";
-    $binance_pay_secret = "REPLACE-WITH-YOUR-BINANCE-MERCHANT-SCRETE-KEY";
-    $signature = strtoupper(hash_hmac('SHA512',$payload,$binance_pay_secret));
-    $headers = array();
-    $headers[] = "Content-Type: application/json";
-    $headers[] = "BinancePay-Timestamp: $timestamp";
-    $headers[] = "BinancePay-Nonce: $nonce";
-    $headers[] = "BinancePay-Certificate-SN: $binance_pay_key";
-    $headers[] = "BinancePay-Signature: $signature";
-
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_URL, "https://bpay.binanceapi.com/binancepay/openapi/v2/order");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $json_request);
-
-    $result = curl_exec($ch);
-    if (curl_errno($ch)) { echo 'Error:' . curl_error($ch); }
-    curl_close ($ch);
-
-    var_dump($result);
-    
-    //Redirect user to the payment page
-
-?>
-```
-
-## USAGE IN LARAVEL
-
-Use this in your targeted controller file.
-
-```
-public function initiateBinancePay(){
-    // Generate nonce string
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $nonce = '';
-    for($i=1; $i <= 32; $i++)
-    {
-        $pos = mt_rand(0, strlen($chars) - 1);
-        $char = $chars[$pos];
-        $nonce .= $char;
-    }
-    $ch = curl_init();
-    $timestamp = round(microtime(true) * 1000);
-    // Request body
-     $request = array(
-       "env" => array(
-             "terminalType" => "APP" 
-          ), 
-       "merchantTradeNo" => mt_rand(982538,9825382937292), 
-       "orderAmount" => 25.17, 
-       "currency" => "BUSD", 
-       "goods" => array(
-                "goodsType" => "01", 
-                "goodsCategory" => "D000", 
-                "referenceGoodsId" => "7876763A3B", 
-                "goodsName" => "Ice Cream", 
-                "goodsDetail" => "Greentea ice cream cone" 
-             ) 
-    ); 
- 
-    $json_request = json_encode($request);
-    $payload = $timestamp."\n".$nonce."\n".$json_request."\n";
-    $binance_pay_key = "REPLACE-WITH-YOUR-BINANCE-MERCHANT-API-KEY";
-    $binance_pay_secret = "REPLACE-WITH-YOUR-BINANCE-MERCHANT-SCRETE-KEY";
-    $signature = strtoupper(hash_hmac('SHA512',$payload,$binance_pay_secret));
-    $headers = array();
-    $headers[] = "Content-Type: application/json";
-    $headers[] = "BinancePay-Timestamp: $timestamp";
-    $headers[] = "BinancePay-Nonce: $nonce";
-    $headers[] = "BinancePay-Certificate-SN: $binance_pay_key";
-    $headers[] = "BinancePay-Signature: $signature";
-
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_URL, "https://bpay.binanceapi.com/binancepay/openapi/v2/order");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $json_request);
-
-    $result = curl_exec($ch);
-    if (curl_errno($ch)) { echo 'Error:' . curl_error($ch); }
-    curl_close ($ch);
-
-    var_dump($result);
-
-    //Redirect user to the payment page
-
+{
+  "orderAmount": 10.0,
+  "goodsType": "01",
+  "goodsCategory": "D000",
+  "referenceGoodsId": "12345",
+  "goodsName": "Product Name",
+  "goodsDetail": "Product Description"
 }
 ```
 
@@ -169,126 +58,20 @@ public function initiateBinancePay(){
 
 ```
 {
-  "status": "SUCCESS",
-  "code": "000000",
-  "data": {
-    "prepayId": "29383937493038367292",
-    "terminalType": "APP",
-    "expireTime": 121123232223,
-    "qrcodeLink": "https://qrservice.dev.com/en/qr/dplkb005181944f84b84aba2430e1177012b.jpg",
-    "qrContent": "https://qrservice.dev.com/en/qr/dplk12121112b",
-    "checkoutUrl": "https://pay.binance.com/checkout/dplk12121112b",
-    "deeplink": "bnc://app.binance.com/payment/secpay/xxxxxx",
-    "universalUrl": "https://app.binance.com/payment/secpay?_dp=xxx=&linkToken=xxx"
-  },
-  "errorMessage": ""
+    "status": "SUCCESS",
+    "message": "Order Created",
+    "code": "000000",
+    "data": {
+        "currency": "USDT",
+        "totalFee": "10",
+        "prepayId": "260835475108052992",
+        "terminalType": "APP",
+        "expireTime": 1699301383637,
+        "qrcodeLink": "https://public.bnbstatic.com/static/payment/20231106/505c33f7-c782-4a85-81f8-0b2beed04b34.jpg",
+        "qrContent": "https://app.binance.com/qr/dplkacbb61f8a4334a24b0b2acd6dcae1ab2",
+        "checkoutUrl": "https://pay.binance.com/en/checkout/3815e96ef371432c8809a543c6dc2311",
+        "deeplink": "bnc://app.binance.com/payment/secpay?tempToken=Ezkxl7aEdsmSB3TPL096jWIRFK2kvnhe",
+        "universalUrl": "https://app.binance.com/payment/secpay?linkToken=3815e96ef371432c8809a543c6dc2311&_dp=Ym5jOi8vYXBwLmJpbmFuY2UuY29tL3BheW1lbnQvc2VjcGF5P3RlbXBUb2tlbj1Femt4bDdhRWRzbVNCM1RQTDA5NmpXSVJGSzJrdm5oZQ"
+    }
 }
 ```
-
-## Binance Pay: Order Webhook Notification
-###Callback Webhook Endpoints
-Binance Pay will send order events with final status to partner for notification. You will be able to configure webhook endpoints via the Binance Merchant Admin Portal Result of the orders that are close will be notified to you through this webhook with bizStatus = "PAY_CLOSED"
-
-> I'll update a webhook callback usage for this soon! You'll be able to receive the JSON responses and validate payments even storing them to your database
-
-
-## Binance Order Webhook Notification API and Payment Confirmation 🥳🥳🥳🥳🥳
-You can now be able to confirm your client payments easily with this api. All you need to do is to set a callback url where Binance will send you a notification regarding the status of the customer payment!.
-Binance Pay will send order events with final status to partner for notification. You will be able to configure webhook endpoints via the Binance Merchant Admin Portal. Result of the orders that are close will be notified to you through this webhook with bizStatus = "PAY_CLOSED".
-
-Create a file in your server to act as a callback receiver to log the binance responses. Example is below:
-
-> Create binancePayWebhookCallbackApi.php in your domain root directory
-
-Then paste the code below
-
-## USAGE IN PHP
-
-```
-
-<?php
-
-  $callbackResponse = file_get_contents('php://input');
-  $logFile = "binancePayWebhookCallbackFile.json";
-  $log = fopen($logFile, "a");
-  fwrite($log, $callbackResponse);
-  fclose($log);
-  
-?>
-
-```
-
-> $logFile = "binancePayWebhookCallbackFile.json";
-
-Create a Json Log file - binancePayWebhookCallbackFile.json - where the responses will be stored.
-
-Once done your webhook url now will be https://yourdomain.com/binancePayWebhookCallbackApi.php
-
-> This means that once a customer pays, Binance will trigger a notification to your callback webhook url with the status of the payment. This data will be stored in your Logfile that you created. 
-
-To achive this you first need to login to your Binance Merchant account and your webhook url : https://yourdomain.com/binancePayWebhookCallbackApi.php
-
-Follow this link to login to Binance Merchant Account and add your Webhook Url: https://merchant.binance.com/en/dashboard/developers/webhooks
-
-
-## YOUR BUSINESS LOGIC 
-
-If you need to store customer data and payment status then you need to create your business logic in the webhook file or create a new file for your logics.
-
-You can get the success object from the webhook response then proceed to validate the customer data and store to your database.
-
-
-### Alternative
-
-> If you don't need to store the responses then just use the respose directly from binance webhook: I have given a good example below implementing the same in Laravel with only 1 Line;
-
-## USAGE IN LARAVEL
-
-```
-
-    public function callbackStk (Request $request){
-
-        header("Content-Type: application/json");
-        
-        //This line gets all your json response from binance when a customer makes payment
-        
-        $webhookResponse = $request->all();
-        
-        //Now get success object directly from the response eg.
-        
-        //Warning: This is just example and you should not use it for your implementation. Get the exact responses from your webhook callback file!
-        
-        $returnCode = $webhookResponse['returnCode'];
-        $returnMessage = $webhookResponse['returnMessage'];
-        
-        //Then start implementing your logic eg.
-        
-        if($returnCode == "SUCCESS"){
-        
-            //Do some logic here
-        
-        }
-  
-    }
-
-
-```
-
-## Finally
-
-> If you need any help regarding webhook confirmation and validation of customer payment and business logic get in touch with me with the contacts on the footer below.
-
-
-## Upcoming Updates
-
-- [x] #C2B - Create Order/Initiate binance payment :tada:
-- [ ] #Receiving webhook responses through callback url for validating and storing response to database
-- [ ] #C2C - Customer to Customer crypto funds transfer using binance API
-- [ ] #B2C - Business to Customer crypto funds transfer using binance API (Bulk/Batch Payments)
-- [ ] #Refunds - Making refunds using the Binance API
-- [ ] #Create Sub-merchant API used for merchant/partner.
-- [ ] #Wallet Balance Query API used to query wallet balance.
-- [ ] #Integrate Binance Pay with your App SDK: Android & IOS
-
-
-
