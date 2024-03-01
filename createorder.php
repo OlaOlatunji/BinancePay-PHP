@@ -1,12 +1,4 @@
 <?php
-// Define constants for Binance Pay credentials
-define('BINANCE_PAY_CERTIFICATE_SN', 'oopzdfrud9qzyb8w2dnh4gjzh2edtkjbiqjzv4yhhfyl41sfhyndtz260ixqzm7l');
-define('BINANCE_PAY_SECRET', '11ormy7nagygzhfjbvw5o6tvnpkkzkidsrs4i5cwopfvnukxe3dlnpojfopivgug');
-define('YOUR_MERCHANT_ID', '168677762');
-
-// Get the amount from the POST data
-$amount = isset($_POST['amount']) ? floatval($_POST['amount']) : null;
-
 // Generate nonce string
 $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 $nonce = '';
@@ -15,90 +7,57 @@ for ($i = 1; $i <= 32; $i++) {
     $char = $chars[$pos];
     $nonce .= $char;
 }
-
-// Initialize cURL
 $ch = curl_init();
+$timestamp = round(microtime(true) * 1000);
 
-// Set request headers
-$headers = array();
-$headers[] = 'Content-Type: application/json';
-$headers[] = 'BinancePay-Timestamp: ' . round(microtime(true) * 1000);
-$headers[] = 'BinancePay-Nonce: ' . $nonce;
-$headers[] = 'BinancePay-Certificate-SN: ' . BINANCE_PAY_CERTIFICATE_SN;
-$headers[] = 'merchantId: ' . YOUR_MERCHANT_ID;
-$headers[] = 'X-Forwarded-For: ' . $_SERVER['REMOTE_ADDR'];
-
-// Build request body
-$request = array(
-    'env' => array('terminalType' => 'MINI_PROGRAM'),
-    'merchantTradeNo' => '2224',
-    'orderAmount' => $amount,
-    'currency' => 'USDT',
-    'goods' => array(
-        'goodsType' => '01',
-        'goodsCategory' => '0000',
-        'referenceGoodsId' => 'balablu',
-        'goodsName' => 'banana',
-        'goodsUnitAmount' => array('currency' => 'USDT', 'amount' => 1.00),
-    ),
-    'shipping' => array(
-        'shippingName' => array('firstName' => 'Joe', 'lastName' => 'Don'),
-        'shippingAddress' => array('region' => 'NZ'),
-    ),
-    'buyer' => array(
-        'buyerName' => array('firstName' => 'cz', 'lastName' => 'zhao'),
-    ),
-);
-$json_request = json_encode($request);
-
-// Build payload
-$payload = implode("\n", array(
-    $headers[1],
-    $nonce,
-    $json_request,
-));
-
-$signature = strtoupper(hash_hmac('SHA512', $payload, BINANCE_PAY_SECRET));
-
-// Add signature header to request headers
-$headers[] = 'BinancePay-Signature: ' . $signature;
-
-// Set cURL options
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-curl_setopt($ch, CURLOPT_URL, 'https://bpay.binanceapi.com/binancepay/openapi/v2/order');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $json_request);
-
-// Execute cURL request
-$result = curl_exec($ch);
-
-// Check for errors
-if (curl_errno($ch)) {
-    $response = array(
-        'success' => false,
-        'error' => 'Error: ' . curl_error($ch),
-    );
+if (isset($_POST['orderAmount'])) {
+    $orderAmount = $_POST['orderAmount'];
 } else {
-    // Output result
-    $response_data = json_decode($result, true);
-    if ($response_data['code'] === '000000') {
-        $response = array(
-            'success' => true,
-            'qr_code_url' => $response_data['qrCodeUrl'],
-            'order_id' => $response_data['merchantTradeNo'],
-        );
-    } else {
-        $response = array(
-            'success' => false,
-            'error' => $response_data['msg'],
-        );
-    }
+    exit("Order amount is missing from the POST request.");
 }
 
-// Close cURL
+$request = array(
+    "env" => array(
+        "terminalType" => "APP" 
+    ),
+    "merchantTradeNo" => mt_rand(982538, 9825382937292),
+    "orderAmount" => floatval($orderAmount),
+    "currency" => "USDT",
+    "goods" => array(
+        "goodsType" => "01",
+        "goodsCategory" => "D000",
+        "referenceGoodsId" => "7876763A3B",
+        "goodsName" => "Ice Cream",
+        "goodsDetail" => "Greentea ice cream cone"
+    )
+);
+
+$json_request = json_encode($request);
+$payload = $timestamp . "\n" . $nonce . "\n" . $json_request . "\n";
+
+// Replace with your actual Binance Pay key and secret
+$binance_pay_key = "YOUR-BINANCE-PAY-KEY";
+$binance_pay_secret = "YOUR-BINANCE-PAY-SECRET-KEY";
+$signature = strtoupper(hash_hmac('SHA512', $payload, $binance_pay_secret));
+$headers = array();
+$headers[] = "Content-Type: application/json";
+$headers[] = "BinancePay-Timestamp: $timestamp";
+$headers[] = "BinancePay-Nonce: $nonce";
+$headers[] = "BinancePay-Certificate-SN: $binance_pay_key";
+$headers[] = "BinancePay-Signature: $signature";
+
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_URL, "https://bpay.binanceapi.com/binancepay/openapi/v2/order");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $json_request);
+
+$result = curl_exec($ch);
+if (curl_errno($ch)) { 
+    echo 'Error: ' . curl_error($ch); 
+}
 curl_close($ch);
 
-// Send the response as JSON
-header('Content-Type: application/json');
-echo json_encode($response);
+var_dump($result);
+
+?>
